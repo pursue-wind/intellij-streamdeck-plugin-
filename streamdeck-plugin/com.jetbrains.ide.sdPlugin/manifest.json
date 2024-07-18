@@ -187,7 +187,11 @@
       ],
       "SupportedInMultiActions": true,
       "UUID": "com.jetbrains.idea.action.show.project.structure"
+    },
+    {
+      "Name": "WebSocket Server",
+      "SupportedInMultiActions": true,
+      "UUID": "com.jetbrains.idea.action.ws"
     }
   ]
-
 }
