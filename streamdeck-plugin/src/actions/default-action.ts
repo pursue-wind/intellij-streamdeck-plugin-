@@ -58,25 +58,7 @@ export abstract class DefaultAction<Instance> extends StreamDeckAction<
 
             return
         }
-
-        const globalSettings = this.plugin.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
-        let host: string = '127.0.0.1'
-        let password: string = ''
-        let port: string = ''
-
-        if (isGlobalSettingsSet(globalSettings)) {
-            host = globalSettings.host
-        }
-
-        if(host === undefined || host === '') {
-            host = '127.0.0.1'
-        }
-
-        if (globalSettings !== undefined) {
-            const settings: GlobalSettingsInterface = globalSettings as GlobalSettingsInterface
-            password = settings.password
-            port = settings.port
-        }
+        let {host, password, port} = this.getConnInfo();
 
         // Handle customized run/debug configuration
         let endpoint = `/api/action/${action}`;
@@ -99,6 +81,28 @@ export abstract class DefaultAction<Instance> extends StreamDeckAction<
             method: 'GET',
         })
 
+    }
+
+    protected getConnInfo() {
+        const globalSettings = this.plugin.settingsManager.getGlobalSettings<GlobalSettingsInterface>()
+        let host: string = '127.0.0.1'
+        let password: string = ''
+        let port: string = ''
+
+        if (isGlobalSettingsSet(globalSettings)) {
+            host = globalSettings.host
+        }
+
+        if (host === undefined || host === '') {
+            host = '127.0.0.1'
+        }
+
+        if (globalSettings !== undefined) {
+            const settings: GlobalSettingsInterface = globalSettings as GlobalSettingsInterface
+            password = settings.password
+            port = settings.port
+        }
+        return {host, password, port};
     }
 
     @SDOnActionEvent('willAppear')

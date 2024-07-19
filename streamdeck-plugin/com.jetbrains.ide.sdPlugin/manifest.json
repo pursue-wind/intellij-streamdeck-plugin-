@@ -197,7 +197,7 @@
         }
       ],
       "SupportedInMultiActions": true,
-      "UUID": "com.jetbrains.idea.action.ws"
+      "UUID": "com.jetbrains.idea.action.editor"
     }
   ]
 

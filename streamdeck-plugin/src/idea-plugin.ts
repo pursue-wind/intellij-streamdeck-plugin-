@@ -17,7 +17,7 @@ import {ShowProjectStructureAction} from "./actions/project-structure-action";
 import {EmptyAction} from "./actions/empty-action";
 import {ActionIdBrowserAction} from "./actions/action-id-browser-action";   
 import {StepIntoAction} from "./actions/step-into-action";
-import {ClipboardDisplayAction} from "./actions/clipboard-action";
+import {EditorAction} from "./actions/editor-action";
 
 export class IdeaPlugin extends StreamDeckPluginHandler {
   constructor() {
@@ -36,7 +36,7 @@ export class IdeaPlugin extends StreamDeckPluginHandler {
     new ShowProjectStructureAction(this, 'com.jetbrains.idea.action.show.project.structure');
     new EmptyAction(this, 'com.jetbrains.idea.empty.action');
     new ActionIdBrowserAction(this, 'com.jetbrains.idea.action.browser');
-    new ClipboardDisplayAction(this, 'com.jetbrains.idea.action.ws');
+    new EditorAction(this, 'com.jetbrains.idea.action.editor');
   }
 }
 
