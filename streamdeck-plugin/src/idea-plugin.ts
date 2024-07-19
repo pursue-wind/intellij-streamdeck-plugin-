@@ -36,8 +36,14 @@ export class IdeaPlugin extends StreamDeckPluginHandler {
     new ShowProjectStructureAction(this, 'com.jetbrains.idea.action.show.project.structure');
     new EmptyAction(this, 'com.jetbrains.idea.empty.action');
     new ActionIdBrowserAction(this, 'com.jetbrains.idea.action.browser');
+  }
+}
+export class EditorPlugin extends StreamDeckPluginHandler {
+  constructor() {
+    super();
     new EditorAction(this, 'com.jetbrains.idea.action.editor');
   }
 }
 
 new IdeaPlugin()
+new EditorPlugin()

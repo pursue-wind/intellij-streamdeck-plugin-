@@ -102,6 +102,11 @@ export abstract class DefaultAction<Instance> extends StreamDeckAction<
             password = settings.password
             port = settings.port
         }
+
+        if (port === undefined || port === '') {
+            port = '21420'
+        }
+
         return {host, password, port};
     }
 
