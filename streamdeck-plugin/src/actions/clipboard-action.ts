@@ -6,7 +6,6 @@ import {
     SDOnActionEvent,
 } from 'streamdeck-typescript';
 import {IdeaPlugin} from '../idea-plugin';
-import {WsServer} from "../ws-server";
 
 
 export class ClipboardDisplayAction extends StreamDeckAction<IdeaPlugin, {}> {
@@ -24,18 +23,19 @@ export class ClipboardDisplayAction extends StreamDeckAction<IdeaPlugin, {}> {
     @SDOnActionEvent('willAppear')
     public onWillAppear({context}: WillAppearEvent): void {
         this.context = context;
-
-        // 创建一个WebSocket服务器实例，监听 21421 端口
-        let ws = new WsServer(21421, (msg: string) => {
-            this.plugin.setTitle(msg, this.context);
-        })
-
-        ws.send()
+        // WebSocket客户端代码
+        const socket: WebSocket = new WebSocket("ws://127.0.0.1:21421");
+        socket.onopen = (): void => {
+            console.log("WebSocket连接已建立");
+        };
+        socket.onmessage = (event: MessageEvent): void => {
+            console.log("接收到消息：" + event.data);
+            this.plugin.setTitle(event.data, this.context);
+        };
     }
 
     @SDOnActionEvent('willDisappear')
     public onWillDisappear(): void {
-
     }
 
 

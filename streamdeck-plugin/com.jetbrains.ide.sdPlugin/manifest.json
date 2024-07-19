@@ -189,9 +189,16 @@
       "UUID": "com.jetbrains.idea.action.show.project.structure"
     },
     {
+      "Icon": "icons/actions/find_dark",
       "Name": "WebSocket Server",
+      "States": [
+        {
+          "Image": "icons/find_dark"
+        }
+      ],
       "SupportedInMultiActions": true,
       "UUID": "com.jetbrains.idea.action.ws"
     }
   ]
+
 }
