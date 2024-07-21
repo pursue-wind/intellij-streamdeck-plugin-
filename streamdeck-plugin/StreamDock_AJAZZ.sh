@@ -44,7 +44,7 @@ echo "Done installing ${pluginName}"
 
 # Reopen the Stream Deck app on background
 if [[ "$OSTYPE" == "msys" ]]; then
-  "C:\Program Files\Elgato\StreamDeck\StreamDeck.exe" &
+  "D:\Tools\Elgato\StreamDeck\StreamDeck.exe" &
 else
   open -a /Applications/Stream\ Dock\ AJAZZ.app/
 fi

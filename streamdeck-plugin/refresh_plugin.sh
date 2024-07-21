@@ -30,7 +30,7 @@ pushd "$pluginsDir"
 # Create the plugins directory
 mkdir $pluginName.sdPlugin
 
-# Copy content from local folder to Application folder
+  # Copy content from local folder to Application folder
 if [[ "$OSTYPE" == "msys" ]]; then
   cp -R "$projectDir/$pluginName.sdPlugin" .
 else
@@ -44,7 +44,7 @@ echo "Done installing ${pluginName}"
 
 # Reopen the Stream Deck app on background
 if [[ "$OSTYPE" == "msys" ]]; then
-  "C:\Program Files\Elgato\StreamDeck\StreamDeck.exe" &
+  "D:\Tools\Elgato\StreamDeck\StreamDeck.exe" &
 else
   open -a Elgato\ Stream\ Deck
 fi
