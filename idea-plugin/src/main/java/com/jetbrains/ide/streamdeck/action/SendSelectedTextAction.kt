@@ -24,6 +24,5 @@ class SendSelectedTextAction : AnAction() {
 
     private fun sendTextToStreamDeck(text: String) {
         log("stream deck req ${text}")
-
     }
 }

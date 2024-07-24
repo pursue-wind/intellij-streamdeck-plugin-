@@ -13,7 +13,7 @@ internal data class ActionServerSettings(
   var password: String = "", // Optional password
   var enable: Boolean = true,// Enable action service or not
   var focusOnly: Boolean = true,// Perform actions only when IDE window is focused
-  var enableRemote: Boolean = false,// Enable action service remote access or not
+  var enableRemote: Boolean = true,// Enable action service remote access or not
 ) : PersistentStateComponent<ActionServerSettings> {
 
   companion object {

@@ -81,6 +81,14 @@ Tips for none supported action so far such as
                 class="com.jetbrains.ide.streamdeck.action.SendSelectedTextAction" text="Send Selected Text"
                 description="Send selected text to stream deck">
         </action>
+        <action id="com.jetbrains.idea.action.editor.cc"
+                class="com.jetbrains.ide.streamdeck.action.ToCamelCaseAction" text="CamelCase Selected Text"
+                description="Send selected text to stream deck">
+        </action>
+        <action id="com.jetbrains.idea.action.editor.ul"
+                class="com.jetbrains.ide.streamdeck.action.ToUnderscoreAction" text="Underscore Selected Text"
+                description="Send selected text to stream deck">
+        </action>
     </actions>
 
     <!-- Extension points defined by the plugin.

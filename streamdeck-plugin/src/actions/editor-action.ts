@@ -24,7 +24,7 @@ export abstract class EditorAction<T extends IdeaPlugin, R> extends StreamDeckAc
 
     let {host, password, port} = this.getConnInfo();
     console.log(`host: ${host}, port: ${port}`);
-    this.wsConn(host, port);
+    this.wsConn(host, "21421");
   }
 
   private wsConn(host: string, port: string) {
@@ -142,7 +142,7 @@ export class EditorCamelCaseAction extends EditorAction<IdeaPlugin, EditorCamelC
   }
 
   actionId(): string {
-    return "CamelCase";
+    return "com.jetbrains.idea.action.editor.cc";
   }
 }
 
@@ -153,6 +153,6 @@ export class EditorUnderscoreAction extends EditorAction<IdeaPlugin, EditorUnder
   }
 
   actionId(): string {
-    return "Underscore";
+    return "com.jetbrains.idea.action.editor.ul";
   }
 }

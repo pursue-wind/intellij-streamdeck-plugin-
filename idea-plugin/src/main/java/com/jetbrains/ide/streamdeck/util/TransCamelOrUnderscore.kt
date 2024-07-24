@@ -1,11 +1,10 @@
 package com.jetbrains.ide.streamdeck.util
 
-
-fun String.toCamelCase(): String {
+val toCamelCase: (String) -> String = {
     val builder = StringBuilder()
     var upperCase = false
-    for (i in this.indices) {
-        val c = this[i]
+    for (i in it.indices) {
+        val c = it[i]
         upperCase = if (c == ' ' || c == '-' || c == '_') {
             true
         } else {
@@ -13,14 +12,13 @@ fun String.toCamelCase(): String {
             false
         }
     }
-    return builder.toString()
+    builder.toString()
 }
 
-fun String.toUnderscore(): String {
-    return this.replace(Regex("([a-z])([A-Z]+)"), "$1_$2")
+
+val toUnderscore: (String) -> String = { s ->
+    s.replace(Regex("([a-z])([A-Z]+)"), "$1_$2")
         .replace(Regex("[ -]"), "_")
         .lowercase()
 }
-
-
 

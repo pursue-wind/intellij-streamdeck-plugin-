@@ -23,13 +23,13 @@ class SelectionChangeListener : ApplicationInitializedListener {
             try {
                 val editorEventMulticaster = EditorFactory.getInstance().eventMulticaster
 
-                val server = WebSocketServer(21420)
+                val server = WebSocketServer(21421)
                 val lis = MySelectionListener { msg ->
                     server.broadcastMessage(msg) { clientName, message ->
                         when (clientName) {
-                            "CamelCase" -> message.toCamelCase()
-                            "Underscore" -> message.toUnderscore()
-                            "Translation" -> message.toUnderscore()
+                            "com.jetbrains.idea.action.editor.cc" -> toCamelCase(message)
+                            "com.jetbrains.idea.action.editor.ul" -> toUnderscore(message)
+                            "com.jetbrains.idea.action.editor.tr" -> toUnderscore(message)
                             else -> message
                         }
                     }
