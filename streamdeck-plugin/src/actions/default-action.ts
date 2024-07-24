@@ -43,6 +43,7 @@ export abstract class DefaultAction<Instance> extends StreamDeckAction<
     @SDOnActionEvent('keyUp')
     public async onKeyUp({payload}: KeyUpEvent<ActionSettingsInterface>): Promise<void> {
         console.log('onKeyUp() actionId=' + this.actionId())
+        console.log(this.plugin)
         let action = payload.settings.action // current button's customized action ID
         let runConfig = payload.settings.runConfig
         console.log('onKeyUp() customAction=' + action)

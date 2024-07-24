@@ -2,11 +2,11 @@
  * Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
  */
 
-import { StreamDeckPluginHandler } from 'streamdeck-typescript'
-import { GitPullAction } from './actions/git-pull-action'
-import { NewProjectAction } from './actions/newProject'
-import { RunAction } from './actions/run-action'
-import { StepOverAction } from './actions/step-over-action'
+import {StreamDeckPluginHandler} from 'streamdeck-typescript'
+import {GitPullAction} from './actions/git-pull-action'
+import {NewProjectAction} from './actions/newProject'
+import {RunAction} from './actions/run-action'
+import {StepOverAction} from './actions/step-over-action'
 import {DebugAction} from "./actions/debug-action";
 import {ResumeAction} from "./actions/resume-action";
 import {SearchEverywhereAction} from "./actions/search-everywhere-action";
@@ -15,9 +15,9 @@ import {PauseAction} from "./actions/pause-action";
 import {StepOutAction} from "./actions/step-out-action";
 import {ShowProjectStructureAction} from "./actions/project-structure-action";
 import {EmptyAction} from "./actions/empty-action";
-import {ActionIdBrowserAction} from "./actions/action-id-browser-action";   
+import {ActionIdBrowserAction} from "./actions/action-id-browser-action";
 import {StepIntoAction} from "./actions/step-into-action";
-import {EditorAction} from "./actions/editor-action";
+import {EditorCamelCaseAction, EditorUnderscoreAction} from "./actions/editor-action";
 
 export class IdeaPlugin extends StreamDeckPluginHandler {
   constructor() {
@@ -38,12 +38,19 @@ export class IdeaPlugin extends StreamDeckPluginHandler {
     new ActionIdBrowserAction(this, 'com.jetbrains.idea.action.browser');
   }
 }
-export class EditorPlugin extends StreamDeckPluginHandler {
+const p = new IdeaPlugin()
+export class EditorCamelCasePlugin {
   constructor() {
-    super();
-    new EditorAction(this, 'com.jetbrains.idea.action.editor');
+    new EditorCamelCaseAction(p, 'com.jetbrains.idea.action.editor.cc');
   }
 }
 
-new IdeaPlugin()
-new EditorPlugin()
+export class EditorUnderscorePlugin {
+  constructor() {
+    new EditorUnderscoreAction(p, 'com.jetbrains.idea.action.editor.ul');
+  }
+}
+
+
+new EditorCamelCasePlugin()
+new EditorUnderscorePlugin()

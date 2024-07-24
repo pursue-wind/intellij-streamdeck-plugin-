@@ -189,15 +189,26 @@
       "UUID": "com.jetbrains.idea.action.show.project.structure"
     },
     {
+      "Icon": "icons/actions/pause_dark",
+      "Name": "C_CamelCase",
+      "States": [
+        {
+          "Image": "icons/pause_dark"
+        }
+      ],
+      "SupportedInMultiActions": true,
+      "UUID": "com.jetbrains.idea.action.editor.cc"
+    },
+    {
       "Icon": "icons/actions/find_dark",
-      "Name": "WebSocket Server",
+      "Name": "C_Underscore",
       "States": [
         {
           "Image": "icons/find_dark"
         }
       ],
       "SupportedInMultiActions": true,
-      "UUID": "com.jetbrains.idea.action.editor"
+      "UUID": "com.jetbrains.idea.action.editor.ul"
     }
   ]
 

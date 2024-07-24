@@ -9,7 +9,8 @@
     "lint": "eslint src/**/*.ts",
     "test": "jest --coverage",
     "tsc": "tsc -p tsconfig.json",
-    "distribution": "DistributionTool -b -i com.jetbrains.ide.sdPlugin -o ../releases"
+    "distribution": "DistributionTool -b -i com.jetbrains.ide.sdPlugin -o ../releases",
+    "dev": "tsc -p tsconfig.json --watch & streamdock dev com.jetbrains.ide.sdPlugin & watchify build/idea-property-inspector.js -o com.jetbrains.ide.sdPlugin/public/dist/idea-property-inspector-bundle.js & watchify build/idea-plugin.js -o com.jetbrains.ide.sdPlugin/public/dist/idea-plugin-bundle.js"
   },
   "type": "module",
   "author": "Thibaut Sabot",

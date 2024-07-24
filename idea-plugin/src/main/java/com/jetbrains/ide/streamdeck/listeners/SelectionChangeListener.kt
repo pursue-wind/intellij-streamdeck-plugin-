@@ -1,17 +1,17 @@
 package com.jetbrains.ide.streamdeck.listeners
 
-import WebSocketServer
 import com.intellij.ide.ApplicationInitializedListener
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.SelectionEvent
 import com.intellij.openapi.editor.event.SelectionListener
+import com.jetbrains.ide.streamdeck.WebSocketServer
+import com.jetbrains.ide.streamdeck.util.toCamelCase
+import com.jetbrains.ide.streamdeck.util.toUnderscore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import java.util.*
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
@@ -24,7 +24,16 @@ class SelectionChangeListener : ApplicationInitializedListener {
                 val editorEventMulticaster = EditorFactory.getInstance().eventMulticaster
 
                 val server = WebSocketServer(21420)
-                val lis = MySelectionListener { msg -> server.broadcastMessage(msg) }
+                val lis = MySelectionListener { msg ->
+                    server.broadcastMessage(msg) { clientName, message ->
+                        when (clientName) {
+                            "CamelCase" -> message.toCamelCase()
+                            "Underscore" -> message.toUnderscore()
+                            "Translation" -> message.toUnderscore()
+                            else -> message
+                        }
+                    }
+                }
                 editorEventMulticaster.addSelectionListener(lis) {}
 
                 asyncScope.async {

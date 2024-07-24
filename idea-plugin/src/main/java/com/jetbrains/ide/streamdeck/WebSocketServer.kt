@@ -1,4 +1,5 @@
-import java.lang.Thread.sleep
+package com.jetbrains.ide.streamdeck;
+
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.nio.channels.SelectionKey
@@ -14,7 +15,7 @@ class WebSocketServer(port: Int) {
 
     private val serverSocketChannel: ServerSocketChannel = ServerSocketChannel.open()
     private val selector: Selector = Selector.open()
-    private val clients = mutableListOf<SocketChannel>()
+    private val clients = mutableMapOf<SocketChannel, String>()
 
     init {
         serverSocketChannel.bind(InetSocketAddress(port))
@@ -32,10 +33,9 @@ class WebSocketServer(port: Int) {
                 val key = selectedKeys.next()
                 selectedKeys.remove()
 
-                if (key.isAcceptable) {
-                    handleAccept(key)
-                } else if (key.isReadable) {
-                    handleRead(key)
+                when {
+                    key.isAcceptable -> handleAccept(key)
+                    key.isReadable -> handleRead(key)
                 }
             }
         }
@@ -45,7 +45,6 @@ class WebSocketServer(port: Int) {
         val clientChannel = (key.channel() as ServerSocketChannel).accept()
         clientChannel.configureBlocking(false)
         clientChannel.register(selector, SelectionKey.OP_READ)
-        clients.add(clientChannel)
         println("Client connected: ${clientChannel.remoteAddress}")
     }
 
@@ -53,46 +52,47 @@ class WebSocketServer(port: Int) {
         val clientChannel = key.channel() as SocketChannel
         val buffer = ByteBuffer.allocate(1024)
         try {
-            val bytesRead = clientChannel.read(buffer)
-            if (bytesRead == -1) {
-                key.cancel()
-                clients.remove(clientChannel)
-                clientChannel.close()
-                println("Client disconnected")
+            if (clientChannel.read(buffer) == -1) {
+                disconnectClient(key, clientChannel)
             } else {
                 buffer.flip()
                 val request = StandardCharsets.UTF_8.decode(buffer).toString()
                 if (request.contains("Sec-WebSocket-Key")) {
                     val response = handleHandshake(request)
                     clientChannel.write(StandardCharsets.UTF_8.encode(response))
+                    val name = getUserNameFromRequest(request)
+                    clients[clientChannel] = name
+                    println("Client handshake complete: ${clientChannel.remoteAddress}, name: $name")
                 } else {
                     handleFrame(clientChannel, buffer)
                 }
             }
         } catch (e: Exception) {
-            println("Error reading from client: ${clientChannel.remoteAddress}")
-            e.printStackTrace()
-            key.cancel()
-            clients.remove(clientChannel)
-            try {
-                clientChannel.close()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
+            handleError(key, clientChannel, e)
         }
     }
 
     private fun handleHandshake(request: String): String {
         val key = request.lines().first { it.startsWith("Sec-WebSocket-Key:") }
-            .replace("Sec-WebSocket-Key:", "").trim()
+            .removePrefix("Sec-WebSocket-Key:").trim()
         val acceptKey = Base64.getEncoder().encodeToString(
             MessageDigest.getInstance("SHA-1")
                 .digest((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").toByteArray(StandardCharsets.UTF_8))
         )
-        return "HTTP/1.1 101 Switching Protocols\r\n" +
-                "Upgrade: websocket\r\n" +
-                "Connection: Upgrade\r\n" +
-                "Sec-WebSocket-Accept: $acceptKey\r\n\r\n"
+        return buildString {
+            append("HTTP/1.1 101 Switching Protocols\r\n")
+            append("Upgrade: websocket\r\n")
+            append("Connection: Upgrade\r\n")
+            append("Sec-WebSocket-Accept: $acceptKey\r\n\r\n")
+        }
+    }
+
+    private fun getUserNameFromRequest(request: String): String {
+        return request.lines().firstOrNull()?.split(" ")?.getOrNull(1)
+            ?.split("?")?.getOrNull(1)
+            ?.split("&")?.associate {
+                it.split("=").let { (key, value) -> key to value }
+            }?.get("name") ?: "Unknown"
     }
 
     private fun handleFrame(clientChannel: SocketChannel, buffer: ByteBuffer) {
@@ -116,93 +116,68 @@ class WebSocketServer(port: Int) {
         }
 
         val message = String(payload, StandardCharsets.UTF_8)
-        println("Received message: $message")
+        println("Received message from ${clients[clientChannel]}: $message")
 
         val response = "Echo: $message"
-        broadcastMessage(response)
+        sendMessage(clientChannel, response)
     }
 
     private fun sendMessage(clientChannel: SocketChannel, message: String) {
         val payload = message.toByteArray(StandardCharsets.UTF_8)
-        val frame: ByteBuffer
+        val frame = ByteBuffer.allocate(getFrameSize(payload.size))
+        frame.put(0x81.toByte())
+        when {
+            payload.size <= 125 -> frame.put(payload.size.toByte())
+            payload.size <= 65535 -> {
+                frame.put(126.toByte())
+                frame.putShort(payload.size.toShort())
+            }
 
-        if (payload.size <= 125) {
-            frame = ByteBuffer.allocate(2 + payload.size)
-            frame.put(0x81.toByte()) // FIN + text frame
-            frame.put(payload.size.toByte())
-        } else if (payload.size <= 65535) {
-            frame = ByteBuffer.allocate(4 + payload.size)
-            frame.put(0x81.toByte()) // FIN + text frame
-            frame.put(126.toByte())
-            frame.putShort(payload.size.toShort())
-        } else {
-            frame = ByteBuffer.allocate(10 + payload.size)
-            frame.put(0x81.toByte()) // FIN + text frame
-            frame.put(127.toByte())
-            frame.putLong(payload.size.toLong())
+            else -> {
+                frame.put(127.toByte())
+                frame.putLong(payload.size.toLong())
+            }
         }
-
         frame.put(payload)
         frame.flip()
         try {
             clientChannel.write(frame)
         } catch (e: Exception) {
-            println("Error sending message to client: ${clientChannel.remoteAddress}")
-            e.printStackTrace()
-            clients.remove(clientChannel)
-            try {
-                clientChannel.close()
-            } catch (ex: Exception) {
-                ex.printStackTrace()
-            }
+            handleError(null, clientChannel, e)
         }
     }
 
-    fun broadcastMessage(message: String) {
-        val payload = message.toByteArray(StandardCharsets.UTF_8)
-
-        val iterator = clients.iterator()
-        while (iterator.hasNext()) {
-            val clientChannel = iterator.next()
+    fun broadcastMessage(message: String, dataTransByKeyFunc: (String, String) -> String) {
+        clients.keys.removeIf { clientChannel ->
             if (clientChannel.isOpen) {
-                val frame: ByteBuffer
-
-                if (payload.size <= 125) {
-                    frame = ByteBuffer.allocate(2 + payload.size)
-                    frame.put(0x81.toByte()) // FIN + text frame
-                    frame.put(payload.size.toByte())
-                } else if (payload.size <= 65535) {
-                    frame = ByteBuffer.allocate(4 + payload.size)
-                    frame.put(0x81.toByte()) // FIN + text frame
-                    frame.put(126.toByte())
-                    frame.putShort(payload.size.toShort())
-                } else {
-                    frame = ByteBuffer.allocate(10 + payload.size)
-                    frame.put(0x81.toByte()) // FIN + text frame
-                    frame.put(127.toByte())
-                    frame.putLong(payload.size.toLong())
-                }
-
-                frame.put(payload)
-                frame.flip()
-
-                try {
-                    clientChannel.write(frame)
-                } catch (e: Exception) {
-                    println("Error sending message to client: ${clientChannel.remoteAddress}")
-                    e.printStackTrace()
-                    iterator.remove()
-                    try {
-                        clientChannel.close()
-                    } catch (ex: Exception) {
-                        ex.printStackTrace()
-                    }
-                }
+                val clientName = clients[clientChannel] ?: "default"
+                val newMsg = dataTransByKeyFunc(clientName, message)
+                sendMessage(clientChannel, newMsg)
+                false
             } else {
-                iterator.remove()
+                true
             }
         }
     }
 
-}
+    private fun disconnectClient(key: SelectionKey?, clientChannel: SocketChannel) {
+        key?.cancel()
+        clients.remove(clientChannel)
+        clientChannel.close()
+        println("Client disconnected")
+    }
 
+    private fun handleError(key: SelectionKey?, clientChannel: SocketChannel, e: Exception) {
+        println("Error with client: ${clientChannel.remoteAddress}")
+        e.printStackTrace()
+        disconnectClient(key, clientChannel)
+    }
+
+    private fun getFrameSize(payloadSize: Int): Int {
+        return when {
+            payloadSize <= 125 -> 2 + payloadSize
+            payloadSize <= 65535 -> 4 + payloadSize
+            else -> 10 + payloadSize
+        }
+    }
+}
