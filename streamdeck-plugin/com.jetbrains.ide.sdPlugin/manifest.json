@@ -189,22 +189,22 @@
       "UUID": "com.jetbrains.idea.action.show.project.structure"
     },
     {
-      "Icon": "icons/actions/pause_dark",
-      "Name": "C_CamelCase",
+      "Icon": "icons/actions/CamelCase",
+      "Name": "To CamelCase",
       "States": [
         {
-          "Image": "icons/pause_dark"
+          "Image": "icons/actions/CamelCase"
         }
       ],
       "SupportedInMultiActions": true,
       "UUID": "com.jetbrains.idea.action.editor.cc"
     },
     {
-      "Icon": "icons/actions/find_dark",
-      "Name": "C_Underscore",
+      "Icon": "icons/actions/underscore_icon",
+      "Name": "To Underscore",
       "States": [
         {
-          "Image": "icons/find_dark"
+          "Image": "icons/actions/underscore_icon"
         }
       ],
       "SupportedInMultiActions": true,
